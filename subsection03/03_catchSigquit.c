@@ -71,6 +71,7 @@ void sig_usr(int signum)
 void psleep()
 {
    printf("hello\n");
+   alarm(1);
 }
 
 int main(void)
@@ -79,13 +80,13 @@ int main(void)
     signal(SIGALRM,psleep);
     signal(SIGTERM,sig_usr);
     signal(SIGQUIT,sig_usr);
-    
 
-    for(;;){
     alarm(1);
-    pause();
+    
+    while(1) {
+        pause();
+    }
    
-}
 
     return 0;
 }

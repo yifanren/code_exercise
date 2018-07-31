@@ -28,8 +28,9 @@ int main(void)
 
     
 
-    printf("unix system time is : %d-%d-%d %d:%d:%d\n",tmNow->tm_year,tmNow->tm_mon,
-            tmNow->tm_mday,tmNow->tm_hour,tmNow->tm_min,tmNow->tm_sec);
+    printf("unix time %ld sec\n", tv.tv_sec);
+   // printf("unix system time is : %d-%d-%d %d:%d:%d\n",tmNow->tm_year,tmNow->tm_mon,
+   //        tmNow->tm_mday,tmNow->tm_hour,tmNow->tm_min,tmNow->tm_sec);
     printf("localtime is : %s.%ld\n",formatedTime,tv.tv_usec);
 
 

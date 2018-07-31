@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <locale.h>
 
 void show(char *arr[],int num);
 void sort(char *arr[],int num);
@@ -11,6 +12,8 @@ void release(char *ch[],int num);
 
 int main(int argc,char *argv[])
 {
+
+    setlocale(LC_ALL,"zh_CN.utf8");
 
     if(argc != 2){
         printf("pleaes input the filename\n");
@@ -24,6 +27,7 @@ int main(int argc,char *argv[])
 
 
 
+
     fp=fopen(argv[1],"r");
     if(fp==NULL){
         printf("open failed\n");
@@ -32,11 +36,11 @@ int main(int argc,char *argv[])
 
     while((fgets(buf,128,fp))!=NULL)
         size++;
-        
+
 
     char ch;
     char *line[size];
-   
+
     fclose(fp);
 
     fp=fopen(argv[1],"r");
@@ -51,7 +55,10 @@ int main(int argc,char *argv[])
 
     printf("********the content is***********\n");
     show(line,size);
-    sort(line,size);
+    //sort(line,size);
+
+    qsort(line, size, sizeof(line[0]), strcoll );
+
     printf("********the content after sort with ASCII***********\n");
     show(line,size);
 
@@ -68,9 +75,8 @@ void show(char *arr[],int num)
     int i;
 
     for(i=0;i<num;i++)
-        printf("%s",arr[i]);
+        printf("%s\n",arr[i]);
 
-    printf("\n");
 }
 
 //have a sort
@@ -79,25 +85,30 @@ void sort(char *arr[],int num)
     int i,j;
     char *newArr;
 
+    int count=0;
     for(i=0;i<num-1;i++){
-        for(j=i;j<num-1;j++){
-            if((strcmp(arr[i],arr[j+1]))<0){
+        for(j=0;j<num-1-i;j++){
+            if((strcmp(arr[j],arr[j+1]))>0){
+                //if(( strcoll(arr[j],arr[j+1]))>0){
 
-                newArr=arr[j+1];
-                arr[j+1]=arr[i];
-                arr[i]=newArr;
-           
+                count++;
+                newArr=arr[j];
+                arr[j]=arr[j+1];
+                arr[j+1]=newArr;
+
+            }
             }
         }
+
+         printf("%d\n",count);
     }
-}
 
 
-//free the space
-void release(char *ch[],int num)
-{
-    int i;
-    for(i=0;i<num;i++)
-        free(ch[i]);
+    //free the space
+    void release(char *ch[],int num)
+    {
+        int i;
+        for(i=0;i<num;i++)
+            free(ch[i]);
 
-}
+    }
