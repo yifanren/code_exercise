@@ -17,26 +17,16 @@ int main(void)
     time(&now);
 
     //get localtime
-    tmNow=localtime(&now);
-
-
+    tmNow = localtime(&now);
+    
     //format localtime
-    strftime(formatedTime,sizeof(formatedTime),"%F %H:%M:%S",tmNow);
+    strftime(formatedTime, sizeof(formatedTime), "%F %H:%M:%S", tmNow);
 
     //get system time
-    gettimeofday(&tv,&tz);
-
-    
+    gettimeofday(&tv, &tz);
 
     printf("unix time %ld sec\n", tv.tv_sec);
-   // printf("unix system time is : %d-%d-%d %d:%d:%d\n",tmNow->tm_year,tmNow->tm_mon,
-   //        tmNow->tm_mday,tmNow->tm_hour,tmNow->tm_min,tmNow->tm_sec);
-    printf("localtime is : %s.%ld\n",formatedTime,tv.tv_usec);
-
-
-
-
-
+    printf("localtime is : %s.%ld\n", formatedTime,tv.tv_usec);
 
     return 0;
 }

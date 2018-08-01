@@ -12,7 +12,6 @@
 #define MAX_TEXT 512
 #define MSGKEY 1281
 
-
 struct msgbuf
 {
     long int mtype;
@@ -24,7 +23,6 @@ void err(char * msgerr)
     printf("%s failed\n",msgerr);
     exit(1);
 }
-
 
 int main(void)
 {
@@ -40,7 +38,6 @@ int main(void)
         perror("msgget failed\n");
         exit(1);
     }
-
 
     if((pid=fork())<0)
         err("fork");
@@ -63,10 +60,8 @@ int main(void)
             if(ret == -1)
                 err("child msgsnd");
 
-
             printf("child exit \n");
             exit(1);
-
         }
 
      //parent
@@ -85,7 +80,7 @@ int main(void)
 
         wait(&status);
 
-        if(!strncmp(buf.mtext,"bye", 3)){
+        if(!strncmp(buf.mtext, "bye", 3)){
             printf("parent success\n");
             exit(1);    
         }
