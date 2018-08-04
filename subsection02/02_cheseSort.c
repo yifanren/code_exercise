@@ -6,14 +6,15 @@
 #include <unistd.h>
 #include <locale.h>
 
-void release(char *ch[],int num);
-void show(char *arr[], int num);
-int sort(char *arr[], int num, int flag);
-int cmpstringp(const void *p1, const void *p2);
+#define BUFSIZE 128
 
-int main(int argc,char *argv[])
+int CompareString(const void *p1, const void *p2)
 {
-    setlocale(LC_ALL, "zh_CN.utf8");
+    return strcoll(*(char **)p1, *(char **)p2);
+}
+
+int main(int argc, char *argv[])
+{
 
     if(argc != 2){
         printf("pleaes input the filename\n");
@@ -21,68 +22,40 @@ int main(int argc,char *argv[])
     }
 
     FILE *fp;
-    static int size;  
-    char buf[128];
-    int i = 0;
-
-    fp = fopen(argv[1], "r");
-    if(fp == NULL){
-        printf("open failed\n");
-        exit(0);
-    }
-
-    while((fgets(buf, 128, fp)) != NULL)
-        size++;
-
-    char ch;
-    char *line[size];
-
-    fclose(fp);
+    char buf[BUFSIZE];
+    int i, num = 0;
+    char *line[1000];
 
     fp = fopen(argv[1],"r");
-    while((fgets(buf, 128, fp)) != NULL)
-    {
-        line[i] = (char *)malloc(strlen(buf)+1);
-        memcpy(line[i], buf, strlen(buf)+1);
-        i++;
-        memset(buf,0,128);
+    if (fp == NULL) {
+        printf("fopen failed\n");
+        exit(1);
     }
 
-    printf("********the content is***********\n");
-    show(line,size);
-    //qsort(line, size, sizeof(line[0]), sort(line, size, 0));
-    //qsort(line, size, sizeof(line[0]), strcoll);
-    qsort(line, size, sizeof(line[0]), cmpstringp);
-    //sort(line, size, 0);
-    printf("********the content after sort with ASCII***********\n");
-    show(line, size);
+    while ((fgets(buf, BUFSIZE, fp)) != NULL) {
+        line[num] = (char *)malloc(strlen(buf) + 1);
+        memcpy(line[num], buf, strlen(buf) + 1);
+        
+        num++;
+    }
 
     fclose(fp);
-    release(line, size);
+
+    printf("********the content is***********\n");
+    for (i = 0; i < num; i++)
+        printf("%s",line[i]);
+   
+    char* curLocale = setlocale(LC_ALL, NULL);
+    setlocale(LC_ALL, "zh_CN.utf8");
+    qsort(line, num, sizeof(line[0]), CompareString);
+    setlocale(LC_ALL, curLocale);
+    printf("********the content after sort with ASCII***********\n");
+    for (i = 0; i < num; i++)
+        printf("%s",line[i]);
+    
+    for (i = 0; i < num; i++)
+        free(line[i]);
 
     return 0;
 }
-
-//show the arr
-void show(char *arr[], int num)
-{
-    int i;
-    for(i = 0; i < num; i++)
-        printf("%s",arr[i]);
-}
-
     
-int cmpstringp(const void *p1, const void *p2)
-{
-   // setlocale(LC_ALL, "zh_CN.utf8");
-    return strcoll(*(char **)p1, *(char **)p2);
-}
-
-//free the space
-void release(char *ch[], int num)
-{
-    int i;
-    for(i = 0; i < num; i++)
-        free(ch[i]);
-
-}

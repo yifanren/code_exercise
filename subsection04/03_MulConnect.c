@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <errno.h>
 
-#define PORT 6776
+#define PORT 8668
 #define BUFSIZE 128
 #define MAX_THREAD_NUM 10
 
@@ -23,7 +23,7 @@ int main(int argc,char *argv[])
         exit(1);
     }
 
-    if(argc == 2 ){
+    if(argc == 2) {
         if(!(strcmp(argv[1],"server"))){
             printf("this is server\n");
             server(); 
@@ -41,11 +41,11 @@ int main(int argc,char *argv[])
 }
 
 #define MAX_TIMEOUT     10
-#define MAX_CLIENT_CNT  500
+#define MAX_CLIENT_CNT  50
 
 typedef struct {
-        int    fd;
-        time_t startTime;
+    int    fd;
+    time_t startTime;
 } ClientInfo_t;
 
 ClientInfo_t client[MAX_CLIENT_CNT] = { {0, 0}, };
@@ -64,10 +64,10 @@ void* ThreadClientRecv(void *param) {
         FD_ZERO(&readFdSet);
         for(int i = 0; i < MAX_CLIENT_CNT; i++) {
             if(client[i].fd > 0) {
-               FD_SET(client[i].fd, &readFdSet);
-               if(maxFd < client[i].fd) {
-                  maxFd = client[i].fd;
-               }
+                FD_SET(client[i].fd, &readFdSet);
+                if(maxFd < client[i].fd) {
+                    maxFd = client[i].fd;
+                }
             }
         }
         timeout.tv_sec  = 0;
@@ -75,13 +75,13 @@ void* ThreadClientRecv(void *param) {
         ret = select(maxFd + 1, &readFdSet, NULL, NULL, &timeout);
 
         if(ret > 0) {
-        
+
             for(int i = 0; i < MAX_CLIENT_CNT; i++) {
                 if(client[i].fd > 0 && FD_ISSET(client[i].fd, &readFdSet)) {
-                     memset(buf, 0, BUFSIZE);
-                     ret = read(client[i].fd, buf, BUFSIZE);
-                     printf("client[%d] recv = %s\n", i, buf);
-                 }
+                    memset(buf, 0, BUFSIZE);
+                    ret = read(client[i].fd, buf, BUFSIZE);
+                    printf("client[%d] recv = %s\n", i, buf);
+                }
             }
         }
         else if(ret == 0) {
@@ -101,7 +101,7 @@ void* ThreadClientRecv(void *param) {
                 waitRecvCnt++;
             }
         }
-        
+
     } while(waitRecvCnt > 0);
 
 }
@@ -121,7 +121,7 @@ void TcpClient(char *ip)
     memset(client, 0, sizeof(client));
     pthread_t threadIdClientRecv;
     pthread_create(&threadIdClientRecv, NULL, ThreadClientRecv, NULL);
-    
+
     for(i = 0; i < MAX_CLIENT_CNT; i++) {
         int fd = 0;
         if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
@@ -190,6 +190,10 @@ void server(){
     int maxfd;
     //create select
 
+    int connectAll[50];
+    int num = 0;
+    int i;
+    pthread_t th; 
     fd_set readfd, rset;
     maxfd=listenfd;
     addrlen = sizeof(client);
@@ -197,7 +201,7 @@ void server(){
     FD_SET(listenfd, &readfd);
 
     while(1){
-  
+
         rset = readfd;
 
         int nread = select(maxfd + 1, &rset, NULL, NULL, NULL); 
@@ -210,40 +214,41 @@ void server(){
 
             if((connectfd = accept(listenfd, (struct sockaddr *)&client, &addrlen)) == -1){
                 perror("server accept failed\n");
-                close(listenfd);
-                exit(1);
+                continue;
             }
 
-            FD_SET(connectfd, &readfd);
+            connectAll[num] = connectfd;
+            FD_SET(connectAll[num], &readfd);
             if(connectfd > maxfd)
                 maxfd = connectfd;
 
-            //connect success
-            printf("acccept client %s, fd is %d\n", inet_ntoa(client.sin_addr), connectfd);
+            num++;
+            
             memset(buf, 0, BUFSIZE);
             len = recv(connectfd, buf, BUFSIZE, 0);
+            
             if(len > 0){
-                printf("recv-----fd : %d ------------%s\n", connectfd, buf);
-
-            memset(buf, 0, BUFSIZE);
-            strcpy(buf, "pong");
-            write(connectfd, buf, strlen(buf));
-            printf("send-----fd : %d ------------%s\n", connectfd, buf);
+                memset(buf, 0, BUFSIZE);
+                strcpy(buf, "pong");
+                write(connectfd, buf, strlen(buf) + 1);
             }
 
-            if(len == 0){
-                printf("%d connect close\n",connect);
-                close(connect);
-            }
         }
-         
-        for(int i = 0; i < 1000; i++) {
-            if(clientFd[i] == 0) {
-                clientFd[i] = connectfd;
-            }
-        }
-    }        
 
-    close(connectfd);
+        for(i = 0; i < num; i++){
+            if(FD_ISSET(connectAll[i], &rset)){
+
+                memset(buf, 0, BUFSIZE);
+                len = recv(connectAll[i], buf, BUFSIZE, 0);
+            
+                if(len == 0)
+                    close(connectAll[i]);
+
+                FD_CLR(connectAll[i], &readfd);
+            }
+        }        
+
+    }
+
     close(listenfd);
 }

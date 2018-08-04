@@ -4,31 +4,29 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-
-void sig_usr(int signum)
+void SigHandler(int signum)
 {
-    printf("bye\n");
-    exit(1);
-}
-
-void psleep()
-{
-   printf("hello\n");
-   alarm(1);
+    if (signum == SIGALRM) {
+        printf("hello\n");
+        alarm(1);
+    } 
+    else if (signum == SIGQUIT || signum == SIGTERM) {
+        printf("bye\n");
+        exit(1);
+    } 
 }
 
 int main(void)
 {
-    signal(SIGALRM,psleep);
-    signal(SIGTERM,sig_usr);
-    signal(SIGQUIT,sig_usr);
+    signal(SIGALRM,SigHandler);
+    signal(SIGTERM,SigHandler);
+    signal(SIGQUIT,SigHandler);
 
     alarm(1);
-    
     while(1) {
         pause();
     }
-   
+
     return 0;
 }
 

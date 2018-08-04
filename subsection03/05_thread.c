@@ -18,11 +18,9 @@ void *ThreadAdd(void* id);
 
 int main(void)
 {
-  
+    int ret, i;
     pthread_t th[MAX_THREAD_NUM];
-    int ret;
     int id[MAX_THREAD_NUM];
-    int i;
     time_t startTime, endTime;   
 
     id[0] = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3);
@@ -30,7 +28,7 @@ int main(void)
     id[2] = (1 << 0) | (1 << 2) | (1 << 3);
     id[3] = (1 << 1) | (1 << 3);
 
-    for(int i = 0; i < MAX_THREAD_NUM; i++) {
+    for (i = 0; i < MAX_THREAD_NUM; i++) {
         if(pthread_mutex_init(&lock[i], NULL) != 0) {
              printf("pthread_mutex_init failed\n");
              exit(1);
@@ -38,8 +36,7 @@ int main(void)
     }
 
     time(&startTime);
-    //create four thread
-    for(i = 0;i < MAX_THREAD_NUM; i++){
+    for (i = 0; i < MAX_THREAD_NUM; i++) {
         ret = pthread_create(&th[i], NULL, ThreadAdd, &id[i]);
 
         if(ret != 0){
@@ -48,8 +45,7 @@ int main(void)
         }
     }
 
-
-    for(i = 0; i < MAX_THREAD_NUM; i++){
+    for (i = 0; i < MAX_THREAD_NUM; i++) {
         pthread_join(th[i], NULL);
     }
 
@@ -66,34 +62,32 @@ void* ThreadAdd(void* id)
     int num = *(int *)id;
     int i = 0;   
 
-    while(i < MAX_COUNT){
-        if(num & (1 << 0)){    
+    while(i < MAX_COUNT) {
+        if (num & (1 << 0)) {    
             pthread_mutex_lock(&lock[0]);
             p++;
             pthread_mutex_unlock(&lock[0]);
-         }
+        }
 
-         if(num & (1 << 1)){    
+        if (num & (1 << 1)) {    
             pthread_mutex_lock(&lock[1]);
             q++;
             pthread_mutex_unlock(&lock[1]);
-         }
+        }
 
 
-         if(num & (1 << 2)){    
+        if (num & (1 << 2)) {    
             pthread_mutex_lock(&lock[2]);
             r++;
             pthread_mutex_unlock(&lock[2]);
-         }
+        }
 
-         if(num & (1 << 3)){
+        if (num & (1 << 3)) {
             pthread_mutex_lock(&lock[3]);
             s++;
             pthread_mutex_unlock(&lock[3]);
-         }
+        }
 
-         i++;
+        i++;
     }
-
-
 }

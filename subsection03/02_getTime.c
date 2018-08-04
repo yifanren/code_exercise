@@ -7,26 +7,17 @@
 
 int main(void)
 {
-    time_t now;
     struct tm* tmNow;
-    char formatedTime[80];
     struct timeval tv;
-    struct timezone tz;
+    char formatedTime[80];
 
-    //get time
-    time(&now);
-
-    //get localtime
-    tmNow = localtime(&now);
+    gettimeofday(&tv, NULL);
+    tmNow = localtime(&tv.tv_sec);
     
-    //format localtime
     strftime(formatedTime, sizeof(formatedTime), "%F %H:%M:%S", tmNow);
 
-    //get system time
-    gettimeofday(&tv, &tz);
-
     printf("unix time %ld sec\n", tv.tv_sec);
-    printf("localtime is : %s.%ld\n", formatedTime,tv.tv_usec);
+    printf("localtime is : %s.%03ld\n", formatedTime, tv.tv_usec/1000);
 
     return 0;
 }

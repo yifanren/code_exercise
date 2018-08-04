@@ -14,7 +14,7 @@ int GetNetworkInfo(char *devName)
     int fd;
     fd = socket(AF_INET, SOCK_DGRAM, 0);
 
-    if(fd < 0){
+    if (fd < 0) {
         printf("socket failed\n");
         return 0;
     }
@@ -26,7 +26,7 @@ int GetNetworkInfo(char *devName)
     //mac addr
     strcpy(ifr.ifr_name, devName);
 
-    if(ioctl(fd, SIOCGIFHWADDR, &ifr) < 0){
+    if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
         return 0;
     }
 
@@ -34,56 +34,43 @@ int GetNetworkInfo(char *devName)
     printf("MAC: %02x-%02x-%02x-%02x-%02x-%02x\n",
             mac[0],mac[1], mac[2], mac[3], mac[4],mac[5]);
 
-
     //Ip
-    strcpy(ifr.ifr_name, devName);
-    
-    if(ioctl(fd, SIOCGIFADDR, &ifr) < 0){
+    if (ioctl(fd, SIOCGIFADDR, &ifr) < 0) {
         ip = 0;
-    }else{
+    } else {
         ip = *(unsigned long *)&ifr.ifr_broadaddr.sa_data[2];
     }
 
     printf("IP: %s\n", inet_ntoa(*(struct in_addr*)&ip));
 
     //broadIp
-    strcpy(ifr.ifr_name, devName);
-
-    if(ioctl(fd, SIOCGIFBRDADDR, &ifr) < 0){
+    if (ioctl(fd, SIOCGIFBRDADDR, &ifr) < 0) {
         broadIp = 0;
-    }else{
+    } else {
         broadIp = *(unsigned long*)&ifr.ifr_broadaddr.sa_data[2];
-        
     }
 
     printf("BroadIP: %s\n", inet_ntoa(*(struct in_addr*)&broadIp));
 
     //mask addr
-    strcpy(ifr.ifr_name, devName);
-    
-    if(ioctl(fd, SIOCGIFNETMASK, &ifr) < 0){
+    if (ioctl(fd, SIOCGIFNETMASK, &ifr) < 0) {
         netmask = 0;
-    }else{
+    } else {
         netmask = *(unsigned long*)&ifr.ifr_netmask.sa_data[2];
     }
 
     printf("Netmask: %s\n", inet_ntoa(*(struct in_addr*)&netmask));
 
     close(fd);
-
-
 }
-
 
 int main(int argc,char *argv[])
 {
 
-    if(argc != 2)
-    {
+    if (argc != 2) {
         perror("pleast input the interface name\n");
         exit(1);
     }
-
 
     GetNetworkInfo(argv[1]);
 
