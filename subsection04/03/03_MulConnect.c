@@ -8,38 +8,10 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
+#include <sys/time.h>
 
-#define PORT 8668
-#define BUFSIZE 128
-#define MAX_THREAD_NUM 10
-
-void TcpClient(char *ip);
-void server();
-
-int main(int argc,char *argv[])
-{
-    if(argc != 2 && argc != 3 ){
-        printf("please input server or client+ip\n");
-        exit(1);
-    }
-
-    if(argc == 2) {
-        if(!(strcmp(argv[1],"server"))){
-            printf("this is server\n");
-            server(); 
-        }
-    }
-
-    if(argc == 3){
-        if(!(strcmp(argv[1], "client"))){
-            printf("this is client\n");
-            TcpClient(argv[2]);
-        }
-    }
-
-    return 0;
-}
-
+#define PORT            6666
+#define BUFSIZE         128
 #define MAX_TIMEOUT     10
 #define MAX_CLIENT_CNT  50
 
@@ -56,8 +28,10 @@ void* ThreadClientRecv(void *param) {
     int maxFd = 0;
     struct timeval timeout = {0, 100 * 1000};
     char buf[BUFSIZE];
+    struct timeval sponseTime[MAX_CLIENT_CNT];
     fd_set readFdSet;
     sleep(1);
+
     do {
         maxFd = 0;
         waitRecvCnt = 0;
@@ -70,10 +44,10 @@ void* ThreadClientRecv(void *param) {
                 }
             }
         }
+
         timeout.tv_sec  = 0;
         timeout.tv_usec = 100 * 1000;
         ret = select(maxFd + 1, &readFdSet, NULL, NULL, &timeout);
-
         if(ret > 0) {
 
             for(int i = 0; i < MAX_CLIENT_CNT; i++) {
@@ -81,6 +55,7 @@ void* ThreadClientRecv(void *param) {
                     memset(buf, 0, BUFSIZE);
                     ret = read(client[i].fd, buf, BUFSIZE);
                     printf("client[%d] recv = %s\n", i, buf);
+                    gettimeofday(&sponseTime[i], NULL);
                 }
             }
         }
@@ -94,20 +69,20 @@ void* ThreadClientRecv(void *param) {
             if(client[i].fd > 0 && (time(0) - client[i].startTime) >= 10) {
                 close(client[i].fd);
                 client[i].fd = 0;
-                printf("clent[%d] close\n", i);
+                printf("client : client %d close\n", i);
             }
 
             if(client[i].fd > 0) {
                 waitRecvCnt++;
             }
         }
-
     } while(waitRecvCnt > 0);
 
+    printf("client recv response spent %ld us\n",sponseTime[MAX_CLIENT_CNT - 1].tv_usec - sponseTime[0].tv_usec);
 }
 
 //client 
-void TcpClient(char *ip)
+void* TcpClient(void *ip)
 {
     struct sockaddr_in remote_addr;
     char buf[BUFSIZE];
@@ -115,7 +90,7 @@ void TcpClient(char *ip)
 
     memset(&remote_addr, 0, sizeof(remote_addr));
     remote_addr.sin_family = AF_INET;
-    remote_addr.sin_addr.s_addr = inet_addr(ip);
+    remote_addr.sin_addr.s_addr = inet_addr((char*)ip);
     remote_addr.sin_port = htons(PORT);
 
     memset(client, 0, sizeof(client));
@@ -150,40 +125,39 @@ void TcpClient(char *ip)
     }
 
     pthread_join(threadIdClientRecv, NULL);
-
 }
 
 //server
-void server(){
-
-    int listenfd,connectfd;
-    struct sockaddr_in server;
-    struct sockaddr_in client;
+void* TcpServer(void *msg) 
+{
+    int serfd,connectfd;
+    struct sockaddr_in serAddr;
+    struct sockaddr_in cliAddr;
     socklen_t addrlen;
     char buf[BUFSIZE];
     int len;
 
     int clientFd[1000];
 
-    if((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+    if((serfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
         perror("server socket failed\n");
         exit(1);
     }
 
-    memset(&server, 0, sizeof(server));
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(PORT);
+    memset(&serAddr, 0, sizeof(serAddr));
+    serAddr.sin_family = AF_INET;
+    serAddr.sin_addr.s_addr = INADDR_ANY;
+    serAddr.sin_port = htons(PORT);
 
-    if(bind(listenfd, (struct sockaddr *)&server, sizeof(server)) == -1){
+    if(bind(serfd, (struct sockaddr *)&serAddr, sizeof(serAddr)) == -1){
         perror("server bind failed\n");
-        close(listenfd);
+        close(serfd);
         exit(1);
     }
 
-    if(listen(listenfd, 10) == -1){
+    if(listen(serfd, 10) == -1){
         perror("server listen failed\n");
-        close(listenfd);
+        close(serfd);
         exit(1);
     }
 
@@ -194,11 +168,12 @@ void server(){
     int num = 0;
     int i;
     pthread_t th; 
-    fd_set readfd, rset;
-    maxfd=listenfd;
+    
     addrlen = sizeof(client);
+    fd_set readfd, rset;
+    maxfd=serfd;
     FD_ZERO(&readfd);
-    FD_SET(listenfd, &readfd);
+    FD_SET(serfd, &readfd);
 
     while(1){
 
@@ -210,9 +185,9 @@ void server(){
             continue;
         }
 
-        if(FD_ISSET(listenfd, &rset)){
+        if(FD_ISSET(serfd, &rset)){
 
-            if((connectfd = accept(listenfd, (struct sockaddr *)&client, &addrlen)) == -1){
+            if((connectfd = accept(serfd, (struct sockaddr *)&cliAddr, &addrlen)) == -1){
                 perror("server accept failed\n");
                 continue;
             }
@@ -226,13 +201,13 @@ void server(){
             
             memset(buf, 0, BUFSIZE);
             len = recv(connectfd, buf, BUFSIZE, 0);
-            
+                
             if(len > 0){
+                printf("server : recv client[%d]  %s\n",connectfd, buf);
                 memset(buf, 0, BUFSIZE);
                 strcpy(buf, "pong");
                 write(connectfd, buf, strlen(buf) + 1);
             }
-
         }
 
         for(i = 0; i < num; i++){
@@ -241,14 +216,29 @@ void server(){
                 memset(buf, 0, BUFSIZE);
                 len = recv(connectAll[i], buf, BUFSIZE, 0);
             
-                if(len == 0)
+                if(len == 0){
                     close(connectAll[i]);
-
+                }
                 FD_CLR(connectAll[i], &readfd);
             }
-        }        
+        }
+    }
+    close(serfd);
+}
 
+int main(int argc,char *argv[])
+{
+    if (argc != 2) {
+        printf("please input ip address :\n");
+        exit(1);
     }
 
-    close(listenfd);
+    pthread_t serThread, cliThread;
+    pthread_create(&serThread, NULL, TcpClient, argv[1]);
+    pthread_create(&cliThread, NULL, TcpServer, NULL);
+
+    pthread_join(cliThread, NULL);
+    pthread_join(serThread, NULL);
+
+    return 0;
 }

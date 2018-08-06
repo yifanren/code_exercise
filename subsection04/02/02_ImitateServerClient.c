@@ -6,35 +6,35 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define PORT 6666
 #define BUFSIZE 128
 
-void client(char *ip);
-void server();
+void* Client(void *ip);
+void* Server(void *msg);
 
 int main(int argc,char *argv[])
 {
     if (argc != 2) {
-        printf("please input server or client\n");
+        printf("please input ip address:\n");
         exit(1);
     }
 
-    if (!(strcmp(argv[1], "client"))) {
-        printf("this is client\n");
-        client(argv[2]);
-    }
+    pthread_t serThread, cliThread;
 
-    if (!(strcmp(argv[1],"server"))) {
-        printf("this is server\n");
-        server(); 
-    }
+    pthread_create(&serThread, NULL, Server, NULL);
+    pthread_create(&cliThread, NULL, Client, argv[1]);
+    
+    pthread_join(cliThread, NULL);
+    pthread_join(serThread, NULL);
 
     return 0;
 }
 
-void client(char *ip)
+void* Client(void *ip)
 {
+
     int clifd;
     struct sockaddr_in remote_addr;
     char buf[BUFSIZE];
@@ -42,7 +42,7 @@ void client(char *ip)
 
     memset(&remote_addr, 0, sizeof(remote_addr));
     remote_addr.sin_family = AF_INET;
-    remote_addr.sin_addr.s_addr = inet_addr(ip);
+    remote_addr.sin_addr.s_addr = inet_addr((char*)ip);
     remote_addr.sin_port = htons(PORT);
 
     if ((clifd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { 
@@ -68,13 +68,13 @@ void client(char *ip)
     memset(buf, 0, BUFSIZE);
     ret = read(clifd, buf, BUFSIZE);
 
-    printf("%s\n",buf);
+    printf("client recv message :%s\n",buf);
 
     close(clifd);
 
 }
 
-void server(){
+void* Server(void *msg){
 
     int serfd,clifd;
     struct sockaddr_in server;
@@ -118,7 +118,7 @@ void server(){
     memset(buf, 0, BUFSIZE);
     len = read(clifd, buf, BUFSIZE);
     if (len > 0)
-        printf("%s\n", buf);
+        printf("server recv message :%s\n", buf);
 
     memset(buf, 0, BUFSIZE);
     strcpy(buf, "pong");

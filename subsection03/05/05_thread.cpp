@@ -8,10 +8,10 @@
 
 using namespace std;
 
-std::atomic_long p(0);
-std::atomic_long q {0};
-std::atomic_long r {0};
-std::atomic_long s {0};
+atomic_long p(0);
+atomic_long q(0);
+atomic_long r(0);
+atomic_long s(0);
 
 void *GetThread(void* id);
 
@@ -41,7 +41,7 @@ int main(void)
 
     endtime = clock();
 
-    printf("p-->%ld, q-->%ld, r-->%ld, s-->%ld\n",p, q, r, s);
+    printf("p = %ld, q = %ld, r = %ld, s = %ld\n", p, q, r, s);
     printf("running time : %ld ms \n", endtime - begintime);
 
     return 0;
@@ -60,7 +60,6 @@ void* GetThread(void* id)
          if(num & (1 << 1)){    
             q++;
          }
-
 
          if(num & (1 << 2)){    
             r++;
