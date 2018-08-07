@@ -1,6 +1,6 @@
-object = 02_ImitateServerClient.o  
+object = ImitateServerClient.o  
 
-PROGRAM := 02_ImitateServerClient
+PROGRAM := ImitateServerClient
 
 all: $(PROGRAM)
 

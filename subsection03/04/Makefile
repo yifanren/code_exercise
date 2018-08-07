@@ -1,6 +1,6 @@
-object = 04_MessageQueue.o  
+object = MessageQueue.o  
 
-PROGRAM := 04_MessageQueue
+PROGRAM := MessageQueue
 
 all: $(PROGRAM)
 

@@ -1,41 +1,18 @@
-rm=/bin/rm -f
-CC= cc
-DEFS=  
-PROGNAME= tcpServerClient
-INCLUDES=  -I.
-LIBS=
-
-
-DEFINES= $(INCLUDES) $(DEFS) -DSYS_UNIX=1
-CFLAGS= -g $(DEFINES)
-LIBS+= -lpthread
-
-SRCS = 05_thread.cpp 
-
-OBJS = 05_thread.o 
-
-.cpp.o:
-    $(rm) $@
-    $(CC) $(CFLAGS) -c $*.cpp
-
-all: $(PROGNAME)
+PROGNAME= SelfAdd
+OBJS= SelfAdd.o
+CC= g++
+LIBS= -lpthread
+CFLAGS= -std=c++11
 
 $(PROGNAME) : $(OBJS)
-    $(CC) $(CFLAGS) -o $(PROGNAME) $(OBJS) $(LIBS)
+	$(CC) $(OBJS) -o $(PROGNAME) $(LIBS)
+
+$(OBJS) :
+	$(CC) -c $*.cpp
+
 
 clean:
-    $(rm) $(OBJS) $(PROGNAME) core *~
-
-
-
-
-
-
-
-
-
-
-
+	rm $(OBJS) $(PROGNAME) 
 
 
 

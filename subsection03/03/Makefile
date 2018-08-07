@@ -1,6 +1,6 @@
-object = 03_CatchSignal.o  
+object = CatchSignal.o  
 
-PROGRAM := 03_CatchSignal
+PROGRAM := CatchSignal
 
 all: $(PROGRAM)
 

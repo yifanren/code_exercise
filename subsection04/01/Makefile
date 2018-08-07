@@ -1,6 +1,6 @@
-object = 01_GetNetworkInfo.o  
+object = GetNetworkInfo.o  
 
-PROGRAM := 01_GetNetworkInfo
+PROGRAM := GetNetworkInfo
 
 all: $(PROGRAM)
 

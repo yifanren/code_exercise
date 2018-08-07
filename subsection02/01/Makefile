@@ -1,6 +1,6 @@
-object = 01_ReadFile.o
+object = AsciiSort.o
 
-PROGRAM := 01_ReadFile
+PROGRAM := AsciiSort
 
 all: $(PROGRAM)
 

@@ -1,6 +1,6 @@
-object = 01_CountFileSize.o
+object = CountFileSize.o
 
-PROGRAM := 01_CountFileSize
+PROGRAM := CountFileSize
 
 all: $(PROGRAM)
 

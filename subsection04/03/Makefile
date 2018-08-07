@@ -1,6 +1,6 @@
-object = 03_MulConnect.o  
+object = MulConnect.o  
 
-PROGRAM := 03_MulConnect
+PROGRAM := MulConnect
 
 all: $(PROGRAM)
 

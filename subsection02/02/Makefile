@@ -1,6 +1,6 @@
-object = 02_CheseSort.o
+object = PinyinSort.o
 
-PROGRAM := 02_CheseSort
+PROGRAM := PinyinSort
 
 all: $(PROGRAM)
 

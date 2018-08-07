@@ -1,6 +1,6 @@
-object = 02_GetTime.o  
+object = GetTime.o  
 
-PROGRAM := 02_GetTime
+PROGRAM := GetTime
 
 all: $(PROGRAM)
 
