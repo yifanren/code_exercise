@@ -8,7 +8,7 @@ $(PROGNAME) : $(OBJS)
 	$(CC) $(OBJS) -o $(PROGNAME) $(LIBS)
 
 $(OBJS) :
-	$(CC) -c $*.cpp
+	$(CC) -c $*.cpp $(CFLAGS)
 
 
 clean:
