@@ -16,15 +16,16 @@ void* Server(void *msg);
 
 int main(int argc,char *argv[])
 {
-    if (argc != 2) {
-        printf("please input ip address:\n");
-        exit(1);
-    }
+//    if (argc != 2) {
+//        printf("please input ip address:\n");
+//        exit(1);
+//    }
 
     pthread_t serThread, cliThread;
 
     pthread_create(&serThread, NULL, Server, NULL);
-    pthread_create(&cliThread, NULL, Client, argv[1]);
+    sleep(2);
+    pthread_create(&cliThread, NULL, Client, "127.0.0.1");
     
     pthread_join(cliThread, NULL);
     pthread_join(serThread, NULL);
