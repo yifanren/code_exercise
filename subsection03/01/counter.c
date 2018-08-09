@@ -18,7 +18,7 @@ void CountFileNum(char* folderPath, struct CountsInfo_s* fileInfo)
     struct dirent *entry;
     struct stat statbuf;
 
-    char filename[128];
+    char filename[1024];
 
     //judge the path is file or folder
     if ((dp = opendir(folderPath)) == NULL) {
@@ -31,7 +31,6 @@ void CountFileNum(char* folderPath, struct CountsInfo_s* fileInfo)
         sprintf(filename, "%s/%s", folderPath, entry->d_name);
         lstat(filename, &statbuf);
 
-        //if(S_ISDIR(statbuf.st_mode)){
         if (DT_DIR & entry->d_type) {
             if (strcmp(".", entry->d_name) == 0 || strcmp("..",entry->d_name) == 0)
                 continue;
@@ -47,7 +46,6 @@ void CountFileNum(char* folderPath, struct CountsInfo_s* fileInfo)
     closedir(dp);
 }
 
-
 int main(int argc,char* argv[])
 {
     if(argc != 2){
@@ -55,14 +53,15 @@ int main(int argc,char* argv[])
         exit(1);
     }
 
-    struct CountsInfo_s fileInfo;   
+    struct CountsInfo_s fileInfo;
+
     fileInfo.totalSize = 0;
     fileInfo.fileCount = 0;
     CountFileNum(argv[1], &fileInfo);
 
     printf("the tatal Bytes is %ld\n",fileInfo.totalSize);
     printf("there are %d file more than 1M\n",fileInfo.fileCount);
-
+   
     return 0;
 }
 

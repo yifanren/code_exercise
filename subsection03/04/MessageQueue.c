@@ -75,8 +75,13 @@ int main(void)
 
         if (!strncmp(buf.mtext, msgBye, strlen(msgBye) + 1)) {
             printf("parent success\n");
-            exit(1);    
         }
     }
+
+    if (msgctl(msgid, IPC_RMID, NULL) == -1){
+        printf("msgctl failed\n");
+        exit(1);
+    }
+
     return 0; 
 }

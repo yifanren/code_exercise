@@ -28,7 +28,6 @@ int main(void)
     while((fgets(buf, BUFSIZE, fp)) != NULL) {
         line[num] = (char *)malloc(strlen(buf)+1);
         memcpy(line[num], buf, strlen(buf)+1);
-
         num++;
     }
 

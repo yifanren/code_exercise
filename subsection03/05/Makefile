@@ -1,18 +1,19 @@
-PROGNAME= SelfAdd
-OBJS= SelfAdd.o
-CC= g++
-LIBS= -lpthread
-CFLAGS= -std=c++11
+PROGNAME = SelfAdd
+OBJS     = SelfAdd.o
+LIBS     = -lpthread
+CFLAGS   = -std=c++11 
+CC       = g++
+
+all: $(PROGNAME)
 
 $(PROGNAME) : $(OBJS)
-	$(CC) $(OBJS) -o $(PROGNAME) $(LIBS)
+	$(CC) -o $@ $^ $(LIBS)
 
-$(OBJS) :
-	$(CC) -c $*.cpp $(CFLAGS)
-
+%.o:%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm $(OBJS) $(PROGNAME) 
+	-rm -f $(OBJS) $(PROGNAME) 
 
 
 

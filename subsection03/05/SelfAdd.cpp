@@ -21,7 +21,11 @@ int64_t q = 0;
 int64_t r = 0;
 int64_t s = 0;
 
-pthread_mutex_t lock[MAX_THREAD_NUM];
+pthread_mutex_t pLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t qLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t rLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t sLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 void* TestMutex(void* id)
 {
@@ -30,28 +34,28 @@ void* TestMutex(void* id)
 
     while(i < MAX_COUNT) {
         if (num & (1 << 0)) {    
-            pthread_mutex_lock(&lock[0]);
+            pthread_mutex_lock(&pLock);
             p++;
-            pthread_mutex_unlock(&lock[0]);
+            pthread_mutex_unlock(&pLock);
         }
 
         if (num & (1 << 1)) {    
-            pthread_mutex_lock(&lock[1]);
+            pthread_mutex_lock(&qLock);
             q++;
-            pthread_mutex_unlock(&lock[1]);
+            pthread_mutex_unlock(&qLock);
         }
 
 
         if (num & (1 << 2)) {    
-            pthread_mutex_lock(&lock[2]);
+            pthread_mutex_lock(&rLock);
             r++;
-            pthread_mutex_unlock(&lock[2]);
+            pthread_mutex_unlock(&rLock);
         }
 
         if (num & (1 << 3)) {
-            pthread_mutex_lock(&lock[3]);
+            pthread_mutex_lock(&sLock);
             s++;
-            pthread_mutex_unlock(&lock[3]);
+            pthread_mutex_unlock(&sLock);
         }
 
         i++;
@@ -99,14 +103,6 @@ int main(void)
     id[2] = (1 << 0) | (1 << 2) | (1 << 3);
     id[3] = (1 << 1) | (1 << 3);
 
-    //mutex
-    for (i = 0; i < MAX_THREAD_NUM; i++) {
-        if(pthread_mutex_init(&lock[i], NULL) != 0) {
-             printf("pthread_mutex_init failed\n");
-             exit(1);
-        }
-    }
-
     time(&startTime);
     for (i = 0; i < MAX_THREAD_NUM; i++) {
         ret = pthread_create(&th[i], NULL, TestMutex, &id[i]);
@@ -120,6 +116,7 @@ int main(void)
     for (i = 0; i < MAX_THREAD_NUM; i++) {
         pthread_join(th[i], NULL);
     }
+    
     time(&endTime);
     
     printf("p : %ld,\tq : %ld,\ts : %ld,\tr : %ld\n", p, q, s, r);

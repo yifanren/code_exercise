@@ -1,6 +1,7 @@
-object = CountFileSize.o
+object  := counter.o
 
-PROGRAM := CountFileSize
+PROGRAM := counter
+CFLAGS  := -g 
 
 all: $(PROGRAM)
 
@@ -8,7 +9,7 @@ $(PROGRAM) : $(object)
 	gcc -o $@  $^ 
 
 %.o:%.c
-	gcc -c $< -o $@ 
+	gcc $(CFLAGS) -c $< -o $@ 
 
 clean :
-	-rm $(object) $(PROGRAM)
+	-rm -f $(object) $(PROGRAM)

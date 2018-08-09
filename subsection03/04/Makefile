@@ -11,4 +11,4 @@ $(PROGRAM) : $(object)
 	gcc -c $< -o $@ 
 
 clean :
-	-rm $(object) $(PROGRAM)
+	-rm -f $(object) $(PROGRAM)
